@@ -60,7 +60,7 @@
     padding:18px 18px 10px;position:relative;overflow:hidden;
     display:flex;justify-content:center;
   }
-  .figcard canvas{display:block;width:100%;max-width:360px;height:auto;}
+  .figcard canvas{display:block;height:min(74vh,600px);width:auto;max-width:100%;margin:0 auto;}
   
   .nameplate{
     text-align:center;padding:18px 8px 6px;
@@ -163,48 +163,104 @@
     *{transition:none !important;}
   }
 
-  /* ===== mobile: keep the preview pinned while choosing (placed last to win) ===== */
+  /* mobile-only chrome — hidden on desktop by default */
+  .focus-bar, .scrim, .view-mode-section, .sheet-handle, .drawer-actions{display:none;}
+  .fb-row{display:flex;gap:9px;align-items:stretch;}
+  .fb-menu{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    border:1px solid var(--hair-2);background:var(--surface);color:var(--ink);border-radius:3px;
+    padding:0 13px;font-family:var(--sans);font-size:11.5px;letter-spacing:.04em;cursor:pointer;white-space:nowrap;}
+  .fb-menu svg{width:15px;height:15px;}
+  .da-row{display:flex;gap:10px;}
+
+  /* ===================== MOBILE ===================== */
   @media(max-width:820px){
     .wrap{padding:16px 16px 60px;}
     header.mast{margin-bottom:12px;padding-bottom:10px;}
     .brand .mark{font-size:28px;}
     .brand .sub{font-size:11px;}
     .count .n{font-size:20px;}
-
     .grid{grid-template-columns:1fr;gap:0;}
-
-    /* compact sticky preview bar */
-    .stage{
-      position:sticky;top:0;z-index:30;
-      background:var(--paper);
-      margin:0 -16px 16px;padding:9px 16px 11px;
-      border-bottom:1px solid var(--hair);
-      box-shadow:0 10px 18px -14px rgba(0,0,0,.35);
-      display:grid;grid-template-columns:86px 1fr;
-      grid-template-areas:"fig name" "fig act";
-      column-gap:13px;row-gap:9px;align-items:center;
-    }
-    .figcard{grid-area:fig;width:86px;padding:6px;align-self:center;}
-    .figcard canvas{max-width:none;}
-    .nameplate{grid-area:name;text-align:left;padding:0;align-self:center;}
-    .nameplate .combo{font-size:14px;line-height:1.32;}
-    .nameplate .combo .x{font-size:11px;margin:0 .16em;}
-    .chips{display:none;}
-    .actions{grid-area:act;margin-top:0;gap:7px;}
+    .view-mode-section{display:block;}
     .btn{font-size:10px;letter-spacing:.03em;padding:10px 4px;gap:5px;}
     .btn svg{width:12px;height:12px;flex:none;}
     .controls{gap:22px;}
+
+    /* ---------- CLASSIC: sticky compact preview + inline controls ---------- */
+    body[data-mview="classic"] .stage{
+      position:sticky;top:0;z-index:30;background:var(--paper);
+      margin:0 -16px 16px;padding:9px 16px 11px;
+      border-bottom:1px solid var(--hair);box-shadow:0 10px 18px -14px rgba(0,0,0,.35);
+      display:grid;grid-template-columns:auto 1fr;
+      grid-template-areas:"fig name" "fig act";
+      column-gap:13px;row-gap:9px;align-items:center;
+    }
+    body[data-mview="classic"] .figcard{width:auto;padding:6px;align-self:center;}
+    body[data-mview="classic"] .figcard canvas{height:264px;max-width:none;}
+    body[data-mview="classic"] .nameplate{text-align:left;padding:0;align-self:center;}
+    body[data-mview="classic"] .nameplate .combo{font-size:14px;line-height:1.32;}
+    body[data-mview="classic"] .nameplate .combo .x{font-size:11px;margin:0 .16em;}
+    body[data-mview="classic"] .chips{display:none;}
+    body[data-mview="classic"] .actions{margin-top:0;gap:7px;}
+
+    /* ---------- FOCUS: preview-first + bottom sheet ---------- */
+    body[data-mview="focus"] .grid{display:block;}
+    body[data-mview="focus"] .stage{display:block;padding:0;margin:0;}
+    body[data-mview="focus"] .figcard{width:auto;padding:10px;}
+    body[data-mview="focus"] .figcard canvas{height:min(56vh,480px);max-width:none;transition:height .3s ease;}
+    body[data-mview="focus"] .nameplate{text-align:center;padding:8px 8px 2px;}
+    body[data-mview="focus"] .nameplate .combo{font-size:16px;line-height:1.3;}
+    body[data-mview="focus"] .chips{display:none;}
+    body[data-mview="focus"] .actions{display:none;}
+    body[data-mview="focus"] footer{display:none;}
+    body[data-mview="focus"] .wrap{padding-bottom:128px;}
+    /* shrink the figure while the sheet is open so the whole outfit stays visible */
+    body[data-mview="focus"].sheet-open .figcard canvas{height:30vh;}
+
+    /* bottom sheet */
+    body[data-mview="focus"] .controls{
+      position:fixed;left:0;right:0;bottom:0;
+      max-height:56vh;background:var(--surface);
+      z-index:60;overflow-y:auto;-webkit-overflow-scrolling:touch;
+      border-radius:16px 16px 0 0;
+      padding:6px 18px calc(104px + env(safe-area-inset-bottom));gap:20px;
+      transform:translateY(101%);transition:transform .3s ease;
+      box-shadow:0 -12px 40px rgba(0,0,0,.22);
+    }
+    body[data-mview="focus"].sheet-open .controls{transform:translateY(0);}
+    body[data-mview="focus"] .sheet-handle{display:block;position:sticky;top:0;
+      width:44px;height:5px;border:none;border-radius:3px;background:var(--hair-2);
+      margin:6px auto 12px;cursor:pointer;padding:0;}
+    body[data-mview="focus"] .drawer-actions{display:block;}
+    body[data-mview="focus"] .theme-section,
+    body[data-mview="focus"] .sleeve-section{display:none;}
+
+    /* transparent tap-catcher above the sheet (keeps preview visible, tap to close) */
+    body[data-mview="focus"] .scrim{display:block;position:fixed;inset:0;
+      background:transparent;z-index:55;pointer-events:none;}
+    body[data-mview="focus"].sheet-open .scrim{pointer-events:auto;}
+
+    /* bottom bar (always on top, even with the sheet open) */
+    body[data-mview="focus"] .focus-bar{
+      display:flex;flex-direction:column;gap:8px;
+      position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--paper);
+      border-top:1px solid var(--hair);
+      padding:10px 14px calc(11px + env(safe-area-inset-bottom));
+      box-shadow:0 -8px 18px -12px rgba(0,0,0,.3);
+    }
+    body[data-mview="focus"] .focus-bar .sleeve-seg{flex:none;}
+    body[data-mview="focus"] .fb-shuffle{flex:1;}
   }
 
   @media(max-width:380px){
-    .stage{grid-template-columns:74px 1fr;column-gap:11px;}
-    .figcard{width:74px;}
+    body[data-mview="classic"] .figcard canvas{height:226px;}
+    body[data-mview="focus"] .figcard canvas{height:48vh;}
     .nameplate .combo{font-size:13px;}
+    .fb-menu{padding:0 9px;font-size:11px;}
     .btn{font-size:9.5px;padding:9px 3px;}
   }
 </style>
 </head>
-<body>
+<body data-mview="focus">
 <div class="wrap">
   <header class="mast">
     <div class="brand">
@@ -225,14 +281,14 @@
     <div class="stage">
       <!-- SVGを削除しCanvasに置き換え -->
       <div class="figcard" id="figcard">
-        <canvas id="figCanvas" width="360" height="600" aria-label="コーディネートのプレビュー"></canvas>
+        <canvas id="figCanvas" width="220" height="600" aria-label="コーディネートのプレビュー"></canvas>
       </div>
       <div class="nameplate">
         <div class="combo" id="comboName"></div>
         <div class="chips" id="chips"></div>
       </div>
       <div class="actions">
-        <button class="btn" id="shuffleBtn">
+        <button class="btn shuffle-btn" id="shuffleBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
           シャッフル
         </button>
@@ -243,10 +299,21 @@
 
     <!-- CONTROLS -->
     <div class="controls">
+      <button id="sheetHandle" class="sheet-handle" aria-label="メニューを閉じる"></button>
+
+      <!-- VIEW MODE (mobile only) -->
+      <div class="section view-mode-section">
+        <div class="head"><div class="title">表示</div><div class="desc">モバイルの表示方法</div></div>
+        <div class="seg full" id="viewModeSeg">
+          <button data-mode="focus" aria-pressed="true">フォーカス</button>
+          <button data-mode="classic" aria-pressed="false">クラシック</button>
+        </div>
+      </div>
+
       <!-- THEME SELECTOR -->
-      <div class="section">
+      <div class="section theme-section">
         <div class="head"><div class="title">テーマ</div><div class="desc">カラーパレットを切り替え</div></div>
-        <div class="seg full" id="themeSeg"></div>
+        <div class="seg full theme-seg" id="themeSeg"></div>
       </div>
 
       <div class="section">
@@ -268,9 +335,17 @@
           <div class="seg full" id="collarSeg"></div>
           <div class="collar-note" id="collarNote"></div>
         </div>
-        <div class="section" style="flex:1; min-width: 140px;">
+        <div class="section sleeve-section" style="flex:1; min-width: 140px;">
           <div class="head"><div class="title">袖丈</div><div class="desc">※シャッフル時ロック</div></div>
-          <div class="seg full" id="sleeveSeg"></div>
+          <div class="seg full sleeve-seg" id="sleeveSeg"></div>
+        </div>
+      </div>
+
+      <div class="section drawer-actions">
+        <div class="head"><div class="title">操作</div></div>
+        <div class="da-row">
+          <button class="btn ghost" id="saveBtnD">保存</button>
+          <button class="btn ghost" id="resetBtnD">写真の色</button>
         </div>
       </div>
 
@@ -278,6 +353,23 @@
         <div class="saved-head"><div class="title">お気に入り</div><div class="desc" id="savedDesc">気に入った組み合わせを保存</div></div>
         <div class="saved-row" id="savedRow"><span class="saved-empty">まだありません。「保存」で追加できます。</span></div>
       </div>
+    </div>
+  </div>
+
+  <!-- mobile focus-mode chrome -->
+  <div id="scrim" class="scrim"></div>
+  <div id="focusBar" class="focus-bar" aria-hidden="true">
+    <div class="seg full theme-seg" id="themeSegM"></div>
+    <div class="fb-row">
+      <button id="menuBtn" class="fb-menu" aria-label="メニューを開く">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        メニュー
+      </button>
+      <div class="seg sleeve-seg" id="sleeveSegM"></div>
+      <button id="shuffleBtnM" class="btn shuffle-btn fb-shuffle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+        シャッフル
+      </button>
     </div>
   </div>
 
@@ -388,24 +480,23 @@ function darken(hx,f){
 
 /* ---------- UI Builders ---------- */
 function buildThemeSeg(){
-  const seg=document.getElementById('themeSeg');
-  seg.innerHTML = Object.keys(THEMES).map(key => 
+  const html = Object.keys(THEMES).map(key =>
     `<button data-key="${key}" aria-pressed="${state.theme===key}">${THEMES[key].name}</button>`
   ).join('');
-  
-  seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-    state.theme = b.dataset.key;
-    state.jacket = 0; // テーマ変更時は選択をリセット
-    state.polo = 0;
-    state.trouser = 0;
-    syncThemeSeg();
-    rebuildAllSwatches();
-    refresh();
-  }));
+  document.querySelectorAll('.theme-seg').forEach(seg=>{
+    seg.innerHTML = html;
+    seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      state.theme = b.dataset.key;
+      state.jacket = 0; state.polo = 0; state.trouser = 0;
+      syncThemeSeg();
+      rebuildAllSwatches();
+      refresh();
+    }));
+  });
 }
 
 function syncThemeSeg() {
-  document.querySelectorAll('#themeSeg button').forEach(b => 
+  document.querySelectorAll('.theme-seg button').forEach(b =>
     b.setAttribute('aria-pressed', (b.dataset.key === state.theme))
   );
 }
@@ -448,12 +539,14 @@ function syncCollar(){
 }
 
 function buildSleeveSeg(){
-  const seg=document.getElementById('sleeveSeg');
-  seg.innerHTML=SLEEVES.map((s,i)=>`<button data-i="${i}" aria-pressed="${state.sleeve===i}">${s.name}</button>`).join('');
-  seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.sleeve=+b.dataset.i;refresh();}));
+  const html=SLEEVES.map((s,i)=>`<button data-i="${i}" aria-pressed="${state.sleeve===i}">${s.name}</button>`).join('');
+  document.querySelectorAll('.sleeve-seg').forEach(seg=>{
+    seg.innerHTML=html;
+    seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.sleeve=+b.dataset.i;refresh();}));
+  });
 }
 function syncSleeve(){
-  document.querySelectorAll('#sleeveSeg button').forEach(b=>b.setAttribute('aria-pressed',(+b.dataset.i===state.sleeve)));
+  document.querySelectorAll('.sleeve-seg button').forEach(b=>b.setAttribute('aria-pressed',(+b.dataset.i===state.sleeve)));
 }
 
 /* ---------- Canvas Figure Renderer ---------- */
@@ -472,7 +565,9 @@ function drawFigure() {
   const skin = "#E4D4C8";
   const ink = "#2B2E31";
 
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, W, H);
+  ctx.translate(-70, 0);
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
 
@@ -598,9 +693,10 @@ function refresh(){
 
 /* ---------- shuffle ---------- */
 let spinning=false;
+function setSpin(on){document.querySelectorAll('.shuffle-btn').forEach(b=>b.classList.toggle('spinning',on));}
 function shuffle(){
   if(spinning)return; spinning=true;
-  const btn=document.getElementById('shuffleBtn'); btn.classList.add('spinning');
+  setSpin(true);
   const current = THEMES[state.theme];
   const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   const land=()=>{
@@ -611,14 +707,14 @@ function shuffle(){
     // state.sleeve はランダム対象から除外（ロック）
     refresh();
   };
-  if(reduce){land();spinning=false;btn.classList.remove('spinning');return;}
+  if(reduce){land();spinning=false;setSpin(false);return;}
   let ticks=0;const total=9;
   const iv=setInterval(()=>{
     state.jacket=Math.floor(Math.random()*current.jackets.length);
     state.polo=Math.floor(Math.random()*current.polos.length);
     state.trouser=Math.floor(Math.random()*current.trousers.length);
     refresh(); ticks++;
-    if(ticks>=total){clearInterval(iv);land();spinning=false;btn.classList.remove('spinning');}
+    if(ticks>=total){clearInterval(iv);land();spinning=false;setSpin(false);}
   },70);
 }
 
@@ -632,13 +728,37 @@ buildCollarSeg();
 buildSleeveSeg();
 
 document.getElementById('shuffleBtn').addEventListener('click',shuffle);
-document.getElementById('saveBtn').addEventListener('click',()=>{
+document.getElementById('shuffleBtnM').addEventListener('click',shuffle);
+
+function doSave(){
   if(saved.some(s=>s.theme===state.theme && s.jacket===state.jacket && s.polo===state.polo && s.trouser===state.trouser && s.collar===state.collar && s.sleeve===state.sleeve)) return;
   saved.push({...state}); renderSaved();
-});
-document.getElementById('resetBtn').addEventListener('click',()=>{
-  Object.assign(state, {jacket:0, polo:0, trouser:0, collar:0, sleeve:0}); 
+}
+function doReset(){
+  Object.assign(state, {jacket:0, polo:0, trouser:0, collar:0, sleeve:0});
   refresh();
+}
+['saveBtn','saveBtnD'].forEach(id=>document.getElementById(id).addEventListener('click',doSave));
+['resetBtn','resetBtnD'].forEach(id=>document.getElementById(id).addEventListener('click',doReset));
+
+/* ---------- mobile: bottom sheet + view mode ---------- */
+function setSheet(open){
+  document.body.classList.toggle('sheet-open', open);
+  const fb=document.getElementById('focusBar');
+  if(fb) fb.setAttribute('aria-hidden', open ? 'true' : 'false');
+}
+document.getElementById('menuBtn').addEventListener('click',()=>
+  setSheet(!document.body.classList.contains('sheet-open')));
+document.getElementById('sheetHandle').addEventListener('click',()=>setSheet(false));
+document.getElementById('scrim').addEventListener('click',()=>setSheet(false));
+
+document.getElementById('viewModeSeg').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.body.dataset.mview=b.dataset.mode;
+    document.querySelectorAll('#viewModeSeg button').forEach(x=>
+      x.setAttribute('aria-pressed', x.dataset.mode===b.dataset.mode));
+    setSheet(false);
+  });
 });
 
 // 初回レンダリング
