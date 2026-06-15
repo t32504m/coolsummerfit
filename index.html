@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIT — ニュアンスカラー試着室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEBE6;
+    --surface:#F6F4EF;
+    --surface-2:#E7E4DC;
+    --ink:#2B2E31;
+    --muted:#827E74;
+    --hair:#D6D2C7;
+    --hair-2:#CFCABE;
+    --serif:"Cormorant Garamond","Noto Serif JP",serif;
+    --sans:"Noto Sans JP",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 24px 80px;}
+
+  /* masthead */
+  header.mast{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:16px;border-bottom:1px solid var(--hair);padding-bottom:18px;margin-bottom:28px;
+  }
+  .brand{display:flex;align-items:baseline;gap:14px;}
+  .brand .mark{
+    font-family:var(--serif);font-weight:600;font-size:40px;letter-spacing:.14em;
+    line-height:1;
+  }
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:.04em;}
+  .eyebrow{
+    font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);
+    font-weight:500;
+  }
+  .count{text-align:right;}
+  .count .n{font-family:var(--serif);font-size:30px;line-height:1;}
+  .count .l{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+
+  /* layout */
+  .grid{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:36px;align-items:start;}
+
+  /* stage */
+  .stage{position:sticky;top:24px;}
+  .figcard{
+    background:linear-gradient(180deg,var(--surface) 0%, #EFEDE7 100%);
+    border:1px solid var(--hair);border-radius:4px;
+    padding:18px 18px 10px;position:relative;overflow:hidden;
+    display:flex;justify-content:center;
+  }
+  .figcard canvas{display:block;width:100%;max-width:360px;height:auto;}
+  
+  .nameplate{
+    text-align:center;padding:18px 8px 6px;
+  }
+  .nameplate .combo{
+    font-family:var(--serif);font-size:25px;line-height:1.2;letter-spacing:.01em;
+  }
+  .nameplate .combo .x{color:var(--muted);font-size:18px;margin:0 .28em;vertical-align:1px;}
+  .chips{display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .chip{display:flex;align-items:center;gap:7px;border:1px solid var(--hair);border-radius:999px;
+    padding:5px 11px 5px 6px;background:var(--surface);}
+  .chip .dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.12);}
+  .chip .meta{font-size:10px;letter-spacing:.06em;}
+  .chip .meta .role{color:var(--muted);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;display:block;}
+  .chip .meta .hx{font-family:var(--serif);font-size:11px;letter-spacing:.05em;}
+
+  /* action row */
+  .actions{display:flex;gap:10px;margin-top:18px;}
+  .btn{
+    flex:1;border:1px solid var(--ink);background:transparent;color:var(--ink);
+    font-family:var(--sans);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    padding:12px 8px;border-radius:3px;cursor:pointer;transition:background .2s,color .2s,transform .08s;
+    display:flex;align-items:center;justify-content:center;gap:8px;font-weight:500;
+  }
+  .btn:hover{background:var(--ink);color:var(--paper);}
+  .btn:active{transform:translateY(1px);}
+  .btn.ghost{border-color:var(--hair-2);color:var(--muted);}
+  .btn.ghost:hover{background:var(--surface-2);color:var(--ink);}
+  .btn svg{width:14px;height:14px;}
+  .btn.spinning{pointer-events:none;}
+
+  /* controls column */
+  .controls{display:flex;flex-direction:column;gap:26px;}
+  .section{}
+  .section .head{display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--hair);padding-bottom:9px;margin-bottom:14px;}
+  .section .head .title{font-family:var(--serif);font-size:19px;}
+  .section .head .desc{font-size:10.5px;color:var(--muted);letter-spacing:.02em;}
+  .swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;}
+  @media(max-width:560px){.swatches{grid-template-columns:repeat(3,1fr);}}
+  .sw{
+    border:none;background:transparent;cursor:pointer;text-align:left;padding:0;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .sw .col{
+    width:100%;aspect-ratio:1/1.18;border-radius:3px;border:1px solid rgba(0,0,0,.10);
+    position:relative;transition:transform .12s ease, box-shadow .2s ease;
+  }
+  .sw .col::after{
+    content:"";position:absolute;inset:-5px;border:1.5px solid var(--ink);border-radius:5px;
+    opacity:0;transition:opacity .18s ease;
+  }
+  .sw[aria-pressed="true"] .col::after{opacity:1;}
+  .sw[aria-pressed="true"] .col{transform:scale(.97);}
+  .sw:hover .col{box-shadow:0 4px 14px rgba(0,0,0,.10);}
+  .sw .nm{font-size:10.5px;line-height:1.35;letter-spacing:.01em;}
+  .sw .nm .base{display:inline-block;font-size:8px;letter-spacing:.14em;color:var(--muted);
+    border:1px solid var(--hair-2);border-radius:2px;padding:0 3px;margin-left:3px;vertical-align:1px;}
+  .sw .hx{font-family:var(--serif);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+  .check{position:absolute;top:5px;right:5px;width:16px;height:16px;border-radius:50%;
+    background:var(--ink);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.6);
+    transition:opacity .18s,transform .18s;}
+  .sw[aria-pressed="true"] .check{opacity:1;transform:scale(1);}
+  .check svg{width:9px;height:9px;stroke:var(--paper);}
+
+  /* segmented controls (theme, collar, sleeve) */
+  .seg{display:flex;border:1px solid var(--hair-2);border-radius:3px;overflow:hidden;}
+  .seg.full{width:100%;}
+  .seg button{
+    flex:1; border:none;background:transparent;font-family:var(--sans);font-size:11.5px;
+    padding:9px 16px;cursor:pointer;color:var(--muted);letter-spacing:.04em;
+    border-right:1px solid var(--hair-2);transition:background .18s,color .18s;
+  }
+  .seg button:last-child{border-right:none;}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);}
+  .collar-note{font-size:10.5px;color:var(--muted);margin-top:8px;}
+
+  /* saved */
+  .saved-head{display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--hair);padding-bottom:9px;margin-bottom:14px;}
+  .saved-head .title{font-family:var(--serif);font-size:19px;}
+  .saved-row{display:flex;gap:10px;flex-wrap:wrap;min-height:46px;}
+  .saved-empty{font-size:11px;color:var(--muted);align-self:center;}
+  .saved{position:relative;border:1px solid var(--hair);border-radius:4px;background:var(--surface);
+    padding:7px 9px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:box-shadow .2s,transform .08s;}
+  .saved:hover{box-shadow:0 4px 12px rgba(0,0,0,.09);}
+  .saved:active{transform:translateY(1px);}
+  .saved .stack{display:flex;flex-direction:column;gap:2px;}
+  .saved .stack i{width:22px;height:6px;border-radius:1px;display:block;border:1px solid rgba(0,0,0,.08);}
+  .saved .lab{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+  .saved .del{position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+    background:var(--ink);color:var(--paper);border:none;cursor:pointer;font-size:11px;line-height:1;
+    display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;}
+  .saved:hover .del{opacity:1;}
+
+  footer{margin-top:46px;border-top:1px solid var(--hair);padding-top:16px;
+    font-size:10.5px;color:var(--muted);letter-spacing:.04em;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+
+  /* ===== mobile: keep the preview pinned while choosing (placed last to win) ===== */
+  @media(max-width:820px){
+    .wrap{padding:16px 16px 60px;}
+    header.mast{margin-bottom:12px;padding-bottom:10px;}
+    .brand .mark{font-size:28px;}
+    .brand .sub{font-size:11px;}
+    .count .n{font-size:20px;}
+
+    .grid{grid-template-columns:1fr;gap:0;}
+
+    /* compact sticky preview bar */
+    .stage{
+      position:sticky;top:0;z-index:30;
+      background:var(--paper);
+      margin:0 -16px 16px;padding:9px 16px 11px;
+      border-bottom:1px solid var(--hair);
+      box-shadow:0 10px 18px -14px rgba(0,0,0,.35);
+      display:grid;grid-template-columns:86px 1fr;
+      grid-template-areas:"fig name" "fig act";
+      column-gap:13px;row-gap:9px;align-items:center;
+    }
+    .figcard{grid-area:fig;width:86px;padding:6px;align-self:center;}
+    .figcard canvas{max-width:none;}
+    .nameplate{grid-area:name;text-align:left;padding:0;align-self:center;}
+    .nameplate .combo{font-size:14px;line-height:1.32;}
+    .nameplate .combo .x{font-size:11px;margin:0 .16em;}
+    .chips{display:none;}
+    .actions{grid-area:act;margin-top:0;gap:7px;}
+    .btn{font-size:10px;letter-spacing:.03em;padding:10px 4px;gap:5px;}
+    .btn svg{width:12px;height:12px;flex:none;}
+    .controls{gap:22px;}
+  }
+
+  @media(max-width:380px){
+    .stage{grid-template-columns:74px 1fr;column-gap:11px;}
+    .figcard{width:74px;}
+    .nameplate .combo{font-size:13px;}
+    .btn{font-size:9.5px;padding:9px 3px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">
+      <div class="mark">FIT</div>
+      <div>
+        <div class="eyebrow">Nuance Palette</div>
+        <div class="sub">ジャケット × ポロ × スラックス を試す</div>
+      </div>
+    </div>
+    <div class="count">
+      <div class="n" id="comboCount">0</div>
+      <div class="l">combinations / theme</div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- STAGE -->
+    <div class="stage">
+      <!-- SVGを削除しCanvasに置き換え -->
+      <div class="figcard" id="figcard">
+        <canvas id="figCanvas" width="360" height="600" aria-label="コーディネートのプレビュー"></canvas>
+      </div>
+      <div class="nameplate">
+        <div class="combo" id="comboName"></div>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="shuffleBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          シャッフル
+        </button>
+        <button class="btn ghost" id="saveBtn">保存</button>
+        <button class="btn ghost" id="resetBtn">写真の色</button>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <!-- THEME SELECTOR -->
+      <div class="section">
+        <div class="head"><div class="title">テーマ</div><div class="desc">カラーパレットを切り替え</div></div>
+        <div class="seg full" id="themeSeg"></div>
+      </div>
+
+      <div class="section">
+        <div class="head"><div class="title">ジャケット</div><div class="desc">明度：中 ／ 彩度：低め</div></div>
+        <div class="swatches" id="sw-jacket"></div>
+      </div>
+      <div class="section">
+        <div class="head"><div class="title">ポロシャツ</div><div class="desc">明度：低 ／ 引き締め色</div></div>
+        <div class="swatches" id="sw-polo"></div>
+      </div>
+      <div class="section">
+        <div class="head"><div class="title">スラックス</div><div class="desc">明度：高 ／ 抜け感色</div></div>
+        <div class="swatches" id="sw-trouser"></div>
+      </div>
+      
+      <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div class="section" style="flex:1; min-width: 140px;">
+          <div class="head"><div class="title">襟</div><div class="desc">ポロの種類</div></div>
+          <div class="seg full" id="collarSeg"></div>
+          <div class="collar-note" id="collarNote"></div>
+        </div>
+        <div class="section" style="flex:1; min-width: 140px;">
+          <div class="head"><div class="title">袖丈</div><div class="desc">※シャッフル時ロック</div></div>
+          <div class="seg full" id="sleeveSeg"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="saved-head"><div class="title">お気に入り</div><div class="desc" id="savedDesc">気に入った組み合わせを保存</div></div>
+        <div class="saved-row" id="savedRow"><span class="saved-empty">まだありません。「保存」で追加できます。</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>3 themes × 5 × 5 × 5 colors × 3 collars — タップで選択、シャッフルでランダム。</span>
+  </footer>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const THEMES = {
+  "cool-summer": {
+    name: "Cool Summer",
+    jackets: [
+      {name:"ブルーグレー",hex:"#7B8B9E",note:"写真の色。知的で涼しげ。",base:true},
+      {name:"スモークオリーブ",hex:"#788273",note:"緑がかったグレー。こなれ感。"},
+      {name:"ウォームトープ",hex:"#9C8D82",note:"茶×グレーの中間。柔らかい。"},
+      {name:"チャコールアッシュ",hex:"#6B6D70",note:"濃いグレー。引き締め。"},
+      {name:"フェイデッドインディゴ",hex:"#5A6B82",note:"褪せたネイビー。"}
+    ],
+    polos: [
+      {name:"ダークネイビー",hex:"#2A3441",note:"写真の色。王道で外さない。",base:true},
+      {name:"オフブラック",hex:"#222222",note:"抜け感のある黒。"},
+      {name:"ディープフォレスト",hex:"#2A3B32",note:"深い森の緑。"},
+      {name:"エスプレッソブラウン",hex:"#3B2E28",note:"焦げ茶。大人の渋み。"},
+      {name:"スレートグレー",hex:"#40474F",note:"青みの濃グレー。都会的。"}
+    ],
+    trousers: [
+      {name:"ライトグレージュ",hex:"#B5B3AD",note:"写真の色。万能ニュアンス。",base:true},
+      {name:"サンドベージュ",hex:"#D4CBB6",note:"明るいベージュ。チノの定番。"},
+      {name:"ペールカーキ",hex:"#A6A292",note:"白っぽいカーキ。上品。"},
+      {name:"アイスグレー",hex:"#C5CCD4",note:"青みの明るいグレー。夏向き。"},
+      {name:"アイボリー",hex:"#E0DCD3",note:"黄みがかった優しい白。"}
+    ]
+  },
+  "autumn-earth": {
+    name: "Autumn Earth",
+    jackets: [
+      {name:"オリーブドラブ",hex:"#6B705C",note:"ミリタリーなカーキ"},
+      {name:"キャメル",hex:"#C19A6B",note:"温かみのある明るい茶色"},
+      {name:"テラコッタ",hex:"#9C5E4B",note:"赤レンガのような土っぽさ"},
+      {name:"ダークブラウン",hex:"#4A3B32",note:"落ち着いた深いブラウン"},
+      {name:"ウォームグレー",hex:"#8A817C",note:"赤みを含んだグレー"}
+    ],
+    polos: [
+      {name:"ディープグリーン",hex:"#2D3A30",note:"もみの木のような深緑"},
+      {name:"バーガンディ",hex:"#5C2C2D",note:"ワインのような深い赤"},
+      {name:"マスタード",hex:"#A87C38",note:"差し色になるくすみイエロー"},
+      {name:"エスプレッソ",hex:"#362720",note:"極めて黒に近い焦げ茶"},
+      {name:"ブラック",hex:"#222222",note:"全体を引き締める黒"}
+    ],
+    trousers: [
+      {name:"カーキベージュ",hex:"#BBA58F",note:"秋らしい少し濃いめのベージュ"},
+      {name:"チャコール",hex:"#4A4E53",note:"重すぎない暗灰色"},
+      {name:"アイボリー",hex:"#E5E0D8",note:"温かみのある白"},
+      {name:"ダークオリーブ",hex:"#484A3B",note:"ミリタリーシックな濃緑"},
+      {name:"セピア",hex:"#7B6A58",note:"褪せたようなブラウン"}
+    ]
+  },
+  "monotone-chic": {
+    name: "Monotone Chic",
+    jackets: [
+      {name:"ブラック",hex:"#222222",note:"モードの基本"},
+      {name:"チャコール",hex:"#404040",note:"柔らかい黒"},
+      {name:"スレート",hex:"#70757A",note:"青みのある中間グレー"},
+      {name:"アッシュグレー",hex:"#B0B5B9",note:"明るく洗練されたグレー"},
+      {name:"オフホワイト",hex:"#EBECEE",note:"クリーンな白"}
+    ],
+    polos: [
+      {name:"ジェットブラック",hex:"#111111",note:"最も深い黒"},
+      {name:"ダークグレー",hex:"#333333",note:"少し抜けのある黒"},
+      {name:"ミディアムグレー",hex:"#666666",note:"標準的な灰色"},
+      {name:"ライトグレー",hex:"#999999",note:"明るい灰色"},
+      {name:"ピュアホワイト",hex:"#F5F5F5",note:"コントラストを作る白"}
+    ],
+    trousers: [
+      {name:"スモーキーブラック",hex:"#2B2B2B",note:"炭のような黒"},
+      {name:"グラファイト",hex:"#4C4F54",note:"少し青みのある濃灰"},
+      {name:"シルバーグレー",hex:"#9A9EA3",note:"メタリックな印象のグレー"},
+      {name:"パールグレー",hex:"#D1D5D8",note:"真珠のような明るいグレー"},
+      {name:"ホワイト",hex:"#F0F0F0",note:"抜け感を作る真っ白"}
+    ]
+  }
+};
+
+const COLLARS=[
+ {id:"button-down",name:"ボタンダウン",note:"写真と同じ。台襟つきで端正な印象。"},
+ {id:"regular",name:"レギュラー",note:"標準的なポロの開襟。こなれた印象。"},
+ {id:"band",name:"バンドカラー",note:"襟なしのスタンドカラー。ミニマル。"},
+];
+
+const SLEEVES=[
+ {id:"long", name:"長袖"},
+ {id:"short", name:"半袖"}
+];
+
+/* ---------- state ---------- */
+const state = { theme: 'cool-summer', jacket: 0, polo: 0, trouser: 0, collar: 0, sleeve: 0 };
+let saved = [];
+
+/* ---------- helpers ---------- */
+function darken(hx,f){
+  hx=hx.replace('#','');
+  const r=parseInt(hx.slice(0,2),16), g=parseInt(hx.slice(2,4),16), b=parseInt(hx.slice(4,6),16);
+  const c=v=>('0'+Math.round(v*f).toString(16)).slice(-2);
+  return '#'+c(r)+c(g)+c(b);
+}
+
+/* ---------- UI Builders ---------- */
+function buildThemeSeg(){
+  const seg=document.getElementById('themeSeg');
+  seg.innerHTML = Object.keys(THEMES).map(key => 
+    `<button data-key="${key}" aria-pressed="${state.theme===key}">${THEMES[key].name}</button>`
+  ).join('');
+  
+  seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    state.theme = b.dataset.key;
+    state.jacket = 0; // テーマ変更時は選択をリセット
+    state.polo = 0;
+    state.trouser = 0;
+    syncThemeSeg();
+    rebuildAllSwatches();
+    refresh();
+  }));
+}
+
+function syncThemeSeg() {
+  document.querySelectorAll('#themeSeg button').forEach(b => 
+    b.setAttribute('aria-pressed', (b.dataset.key === state.theme))
+  );
+}
+
+function buildSwatches(elId, arr, key){
+  const el=document.getElementById(elId);
+  el.innerHTML=arr.map((o,i)=>`
+    <button class="sw" data-i="${i}" aria-pressed="${state[key]===i}" title="${o.note}">
+      <span class="col" style="background:${o.hex}">
+        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+      </span>
+      <span class="nm">${o.name}${o.base?'<span class="base">写真</span>':''}</span>
+      <span class="hx">${o.hex.toUpperCase()}</span>
+    </button>`).join('');
+  el.querySelectorAll('.sw').forEach(b=>b.addEventListener('click',()=>{
+    state[key]=+b.dataset.i; refresh();
+  }));
+}
+
+function rebuildAllSwatches() {
+  const current = THEMES[state.theme];
+  buildSwatches('sw-jacket', current.jackets, 'jacket');
+  buildSwatches('sw-polo', current.polos, 'polo');
+  buildSwatches('sw-trouser', current.trousers, 'trouser');
+}
+
+function syncPressed(elId,key){
+  document.querySelectorAll('#'+elId+' .sw').forEach(b=>
+    b.setAttribute('aria-pressed', (+b.dataset.i===state[key])));
+}
+
+function buildCollarSeg(){
+  const seg=document.getElementById('collarSeg');
+  seg.innerHTML=COLLARS.map((c,i)=>`<button data-i="${i}" aria-pressed="${state.collar===i}">${c.name}</button>`).join('');
+  seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.collar=+b.dataset.i;refresh();}));
+}
+function syncCollar(){
+  document.querySelectorAll('#collarSeg button').forEach(b=>b.setAttribute('aria-pressed',(+b.dataset.i===state.collar)));
+  document.getElementById('collarNote').textContent=COLLARS[state.collar].note;
+}
+
+function buildSleeveSeg(){
+  const seg=document.getElementById('sleeveSeg');
+  seg.innerHTML=SLEEVES.map((s,i)=>`<button data-i="${i}" aria-pressed="${state.sleeve===i}">${s.name}</button>`).join('');
+  seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.sleeve=+b.dataset.i;refresh();}));
+}
+function syncSleeve(){
+  document.querySelectorAll('#sleeveSeg button').forEach(b=>b.setAttribute('aria-pressed',(+b.dataset.i===state.sleeve)));
+}
+
+/* ---------- Canvas Figure Renderer ---------- */
+function drawFigure() {
+  const canvas = document.getElementById('figCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Current Theme Colors
+  const current = THEMES[state.theme];
+  const jHex = current.jackets[state.jacket].hex;
+  const pHex = current.polos[state.polo].hex;
+  const tHex = current.trousers[state.trouser].hex;
+  
+  const skin = "#E4D4C8";
+  const ink = "#2B2E31";
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  const drawPath = (fillColor, pathFn, doStroke = true) => {
+    ctx.beginPath();
+    pathFn(ctx);
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+    if (doStroke) {
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = ink;
+      ctx.stroke();
+    }
+  };
+
+  // 1. Drop Shadow
+  drawPath('rgba(0,0,0,0.06)', c => c.ellipse(180, 580, 80, 10, 0, 0, Math.PI * 2), false);
+
+  // 2. Trousers
+  drawPath(tHex, c => c.roundRect(125, 360, 50, 220, 3));
+  drawPath(tHex, c => c.roundRect(185, 360, 50, 220, 3));
+  drawPath(tHex, c => c.rect(125, 340, 110, 40));
+
+  // 3. Head & Neck
+  drawPath(skin, c => c.rect(166, 100, 28, 40));
+  drawPath(skin, c => c.ellipse(180, 75, 36, 42, 0, 0, Math.PI * 2));
+
+  // 4. Polo Shirt
+  drawPath(pHex, c => c.roundRect(128, 135, 104, 220, 6));
+
+  const collar = COLLARS[state.collar].id;
+  if (collar === 'band') {
+    drawPath(pHex, c => c.roundRect(162, 130, 36, 16, 4));
+    drawPath(pHex, c => c.rect(174, 146, 12, 45)); 
+  } else {
+    drawPath(pHex, c => { c.moveTo(180, 155); c.lineTo(152, 135); c.lineTo(158, 175); c.closePath(); });
+    drawPath(pHex, c => { c.moveTo(180, 155); c.lineTo(208, 135); c.lineTo(202, 175); c.closePath(); });
+    drawPath(pHex, c => c.rect(174, 155, 12, 50));
+  }
+
+  // 5. Jacket & Arms
+  const sleeve = SLEEVES[state.sleeve].id;
+
+  if (sleeve === 'short') {
+    // 肌（腕の下半分）
+    drawPath(skin, c => c.roundRect(92, 230, 28, 140, 10)); // 左腕
+    drawPath(skin, c => c.roundRect(240, 230, 28, 140, 10)); // 右腕
+
+    // ジャケット（半袖）
+    drawPath(jHex, c => c.roundRect(84, 140, 44, 110, [12, 4, 4, 12]));
+    drawPath(jHex, c => c.roundRect(232, 140, 44, 110, [4, 12, 12, 4]));
+  } else {
+    // ジャケット（長袖）
+    drawPath(jHex, c => c.roundRect(84, 140, 44, 230, [12, 4, 4, 12]));
+    drawPath(jHex, c => c.roundRect(232, 140, 44, 230, [4, 12, 12, 4]));
+  }
+  
+  // Left & Right Body Panel
+  drawPath(jHex, c => {
+    c.moveTo(128, 135); c.lineTo(165, 145); c.lineTo(165, 260); 
+    c.lineTo(145, 360); c.lineTo(128, 360); c.closePath();
+  });
+  
+  drawPath(jHex, c => {
+    c.moveTo(232, 135); c.lineTo(195, 145); c.lineTo(195, 260); 
+    c.lineTo(215, 360); c.lineTo(232, 360); c.closePath();
+  });
+
+  drawPath(darken(jHex, 0.9), c => { c.moveTo(165, 145); c.lineTo(145, 210); c.lineTo(165, 260); c.closePath(); });
+  drawPath(darken(jHex, 0.9), c => { c.moveTo(195, 145); c.lineTo(215, 210); c.lineTo(195, 260); c.closePath(); });
+}
+
+/* ---------- nameplate ---------- */
+function renderNameplate(){
+  const current = THEMES[state.theme];
+  const j=current.jackets[state.jacket], p=current.polos[state.polo], t=current.trousers[state.trouser];
+  
+  document.getElementById('comboName').innerHTML=
+    `${j.name}<span class="x">×</span>${p.name}<span class="x">×</span>${t.name}`;
+    
+  const chip=(role,o)=>`<div class="chip"><span class="dot" style="background:${o.hex}"></span>
+     <span class="meta"><span class="role">${role}</span><span class="hx">${o.hex.toUpperCase()}</span></span></div>`;
+  document.getElementById('chips').innerHTML=chip('Jacket',j)+chip('Polo',p)+chip('Trouser',t);
+}
+
+/* ---------- saved ---------- */
+function renderSaved(){
+  const row=document.getElementById('savedRow');
+  if(saved.length===0){row.innerHTML='<span class="saved-empty">まだありません。「保存」で追加できます。</span>';
+    document.getElementById('savedDesc').textContent='気に入った組み合わせを保存';return;}
+  document.getElementById('savedDesc').textContent=saved.length+' 件';
+  row.innerHTML=saved.map((s,idx)=>{
+    const theme = THEMES[s.theme];
+    const j=theme.jackets[s.jacket].hex, p=theme.polos[s.polo].hex, t=theme.trousers[s.trouser].hex;
+    return `<div class="saved" data-idx="${idx}" title="[${theme.name}] ${COLLARS[s.collar].name} / ${SLEEVES[s.sleeve].name}">
+      <span class="stack"><i style="background:${j}"></i><i style="background:${p}"></i><i style="background:${t}"></i></span>
+      <span class="lab">#${idx+1}</span>
+      <button class="del" data-del="${idx}" aria-label="削除">×</button>
+    </div>`;}).join('');
+    
+  row.querySelectorAll('.saved').forEach(c=>c.addEventListener('click',e=>{
+    if(e.target.classList.contains('del'))return;
+    Object.assign(state, saved[+c.dataset.idx]);
+    syncThemeSeg();
+    rebuildAllSwatches();
+    refresh();
+  }));
+  row.querySelectorAll('.del').forEach(d=>d.addEventListener('click',e=>{
+    e.stopPropagation(); saved.splice(+d.dataset.del,1); renderSaved();
+  }));
+}
+
+/* ---------- refresh ---------- */
+function refresh(){
+  drawFigure(); 
+  renderNameplate();
+  syncPressed('sw-jacket','jacket'); 
+  syncPressed('sw-polo','polo'); 
+  syncPressed('sw-trouser','trouser');
+  syncCollar();
+  syncSleeve();
+}
+
+/* ---------- shuffle ---------- */
+let spinning=false;
+function shuffle(){
+  if(spinning)return; spinning=true;
+  const btn=document.getElementById('shuffleBtn'); btn.classList.add('spinning');
+  const current = THEMES[state.theme];
+  const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const land=()=>{
+    state.jacket=Math.floor(Math.random()*current.jackets.length);
+    state.polo=Math.floor(Math.random()*current.polos.length);
+    state.trouser=Math.floor(Math.random()*current.trousers.length);
+    if(Math.random()<0.5)state.collar=Math.floor(Math.random()*COLLARS.length);
+    // state.sleeve はランダム対象から除外（ロック）
+    refresh();
+  };
+  if(reduce){land();spinning=false;btn.classList.remove('spinning');return;}
+  let ticks=0;const total=9;
+  const iv=setInterval(()=>{
+    state.jacket=Math.floor(Math.random()*current.jackets.length);
+    state.polo=Math.floor(Math.random()*current.polos.length);
+    state.trouser=Math.floor(Math.random()*current.trousers.length);
+    refresh(); ticks++;
+    if(ticks>=total){clearInterval(iv);land();spinning=false;btn.classList.remove('spinning');}
+  },70);
+}
+
+/* ---------- init ---------- */
+const currentTheme = THEMES[state.theme];
+document.getElementById('comboCount').textContent = currentTheme.jackets.length * currentTheme.polos.length * currentTheme.trousers.length * COLLARS.length;
+
+buildThemeSeg();
+rebuildAllSwatches();
+buildCollarSeg();
+buildSleeveSeg();
+
+document.getElementById('shuffleBtn').addEventListener('click',shuffle);
+document.getElementById('saveBtn').addEventListener('click',()=>{
+  if(saved.some(s=>s.theme===state.theme && s.jacket===state.jacket && s.polo===state.polo && s.trouser===state.trouser && s.collar===state.collar && s.sleeve===state.sleeve)) return;
+  saved.push({...state}); renderSaved();
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  Object.assign(state, {jacket:0, polo:0, trouser:0, collar:0, sleeve:0}); 
+  refresh();
+});
+
+// 初回レンダリング
+refresh(); renderSaved();
+</script>
+</body>
+</html>
